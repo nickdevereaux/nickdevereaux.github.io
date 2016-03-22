@@ -130,7 +130,9 @@ body {
     </svg>
   </div>
 </h1>
+<div id="ifttt" style="visibility:hidden">
 <a  href="https://ifttt.com/view_embed_recipe/397282-check-if-google-transit-has-come-to-melbourne" target = "_blank" class="embed_recipe embed_recipe-l_45" id= "embed_recipe-397282"><img src= 'https://ifttt.com/recipe_embed_img/397282' alt="IFTTT Recipe: Check if Google Transit has come to Melbourne connects twitter to pushbullet" width="370px" style="max-width:100%; display:none"/></a><script async type="text/javascript" src= "//ifttt.com/assets/embed_recipe.js"></script>
+</div>
 </center>
 </div>
 
@@ -149,11 +151,11 @@ function initMap() {
   directionsService.route(request, function(result, status) {
   	var yee = document.getElementById('yeahnah')
     if (status == google.maps.DirectionsStatus.OK) {
-      
-      yee.innerHTML = 'YES!'
+      yee.innerHTML = '<a target="_blank" href="https://www.google.com.au/maps?saddr=Melbourne, VIC&daddr=Brunswick, VIC&dirflg=r">YES!</a>'
+
     } else {
     	yee.innerHTML = 'No.'
-      document.getElementsByClassName('embed_recipe')[0].style.display = undefined
+      document.getElementById('ifttt').style.visibility = undefined;
     }
   });
 }
