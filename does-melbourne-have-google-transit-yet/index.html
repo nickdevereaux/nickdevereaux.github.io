@@ -115,6 +115,22 @@ body {
         font-weight: bold;
         font-family: sans-serif;
       }
+      #map{
+        width:500px;
+        height:300px;
+        margin:10px;
+      }
+      #map-wrapper{
+        padding-top:25px;
+      }
+      
+      input{
+        display: block;
+    font-size: 1.2em;
+    padding: 0.2em;
+    width: 500px;
+    text-align: center;
+      }
 </style>
 </head>
 <body>
@@ -130,32 +146,75 @@ body {
     </svg>
   </div>
 </h1>
+<a href="https://twitter.com/share" class="twitter-share-button" data-text="Melbourne finally has Google Transit!" data-via="nickjdevereaux" data-size="large">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 <div id="ifttt" style="visibility:hidden">
-<a  href="https://ifttt.com/view_embed_recipe/397282-check-if-google-transit-has-come-to-melbourne" target = "_blank" class="embed_recipe embed_recipe-l_45" id= "embed_recipe-397282"><img src= 'https://ifttt.com/recipe_embed_img/397282' alt="IFTTT Recipe: Check if Google Transit has come to Melbourne connects twitter to pushbullet" width="370px" style="max-width:100%; display:none"/></a><script async type="text/javascript" src= "//ifttt.com/assets/embed_recipe.js"></script>
+<a href="https://ifttt.com/view_embed_recipe/397282-check-if-google-transit-has-come-to-melbourne" target = "_blank" class="embed_recipe embed_recipe-l_45" id= "embed_recipe-397282"><img src= 'https://ifttt.com/recipe_embed_img/397282' alt="IFTTT Recipe: Check if Google Transit has come to Melbourne connects twitter to pushbullet" width="370px" style="max-width:100%; display:none"/></a><script async type="text/javascript" src= "//ifttt.com/assets/embed_recipe.js"></script>
 </div>
+<div id="map-wrapper" style="display:none">
+  <input id="from" onClick="this.setSelectionRange(0, this.value.length)" class="lg" type="text" placeholder="From" value="Brunswick VIC, Australia" />
+  <input id="to" onClick="this.setSelectionRange(0, this.value.length)" class="lg" type="text" placeholder="To" value="Royal Botanical Gardens Melbourne, Australia" />
+  <div id="map">
+  </div>
+</div>
+
+
 </center>
 </div>
 
 
- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLARnVqsnx9osdChw1YSIJxlx5Yo-X5mk&callback=initMap" async defer></script>
+ <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyCLARnVqsnx9osdChw1YSIJxlx5Yo-X5mk&callback=initMap" async defer></script>
 
 <script type="text/javascript">
-
+ 
+function search(){
+  var request = {
+    origin:document.getElementById('from').value,
+    destination:document.getElementById('to').value,
+    travelMode: google.maps.TravelMode.TRANSIT
+  };
+  directionsService.route(request, function(result, status) {
+    directionsDisplay.setDirections(result);
+  });
+  ga('send', 'event', 'Search', '', '');
+}
 function initMap() {
   directionsService = new google.maps.DirectionsService();
   var request = {
-    origin:'Melbourne VIC, Australia',
-    destination:'Brunswick VIC, Australia',
+    origin:document.getElementById('from').value,//'Brunswick VIC, Australia',
+    destination:document.getElementById('to').value,//'Royal Botanical Gardens Melbourne, Australia',
     travelMode: google.maps.TravelMode.TRANSIT
   };
   directionsService.route(request, function(result, status) {
   	var yee = document.getElementById('yeahnah')
     if (status == google.maps.DirectionsStatus.OK) {
-      yee.innerHTML = '<a target="_blank" href="https://www.google.com.au/maps?saddr=Melbourne, VIC&daddr=Brunswick, VIC&dirflg=r">YES!</a>'
-
+      document.getElementById('ifttt').style.display = 'none';
+      document.getElementById('map-wrapper').style.display = null;
+          //<a target="_blank" href="https://www.google.com.au/maps?saddr=Melbourne, VIC&daddr=Brunswick, VIC&dirflg=r">
+        yee.innerHTML = 'YES!'
+        directionsDisplay = new google.maps.DirectionsRenderer();
+        var mapOptions = {
+        zoom:7
+      }
+      map = new google.maps.Map(document.getElementById("map"), mapOptions);
+      directionsDisplay.setMap(map);
+      directionsDisplay.setDirections(result);
+      var autoCompleteOptions = {
+        //types: ['(address)'],
+        componentRestrictions: {country:'au'}
+      };
+      
+      var autocompleteFrom = new google.maps.places.Autocomplete(document.getElementById('from'),autoCompleteOptions);
+      google.maps.event.addListener(autocompleteFrom, 'place_changed', function() {
+        search();
+      });
+      var autocompleteTo = new google.maps.places.Autocomplete(document.getElementById('to'),autoCompleteOptions);
+      google.maps.event.addListener(autocompleteTo, 'place_changed', function() {
+        search();
+      });
     } else {
     	yee.innerHTML = 'No.'
-      document.getElementById('ifttt').style.visibility = undefined;
+      document.getElementById('ifttt').style.visibility = null;
     }
   });
 }
